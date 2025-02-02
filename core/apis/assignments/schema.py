@@ -1,4 +1,4 @@
-from marshmallow import Schema, EXCLUDE, fields, post_load
+from marshmallow import Schema, EXCLUDE, fields, post_load, validates, ValidationError
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from marshmallow_enum import EnumField
 from core.models.assignments import Assignment, GradeEnum
@@ -11,7 +11,13 @@ class AssignmentSchema(SQLAlchemyAutoSchema):
         unknown = EXCLUDE
 
     id = auto_field(required=False, allow_none=True)
-    content = auto_field()
+    content = fields.String(required=True, allow_none=False)
+
+    @validates('content')
+    def validate_content(self, value):
+        if value is None:
+            raise ValidationError('Content cannot be empty')
+
     created_at = auto_field(dump_only=True)
     updated_at = auto_field(dump_only=True)
     teacher_id = auto_field(dump_only=True)

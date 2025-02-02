@@ -1,3 +1,5 @@
+from core import db
+from core.models.assignments import Assignment, AssignmentStateEnum
 def test_get_assignments_student_1(client, h_student_1):
     response = client.get(
         '/student/assignments',
@@ -58,6 +60,12 @@ def test_post_assignment_student_1(client, h_student_1):
 
 
 def test_submit_assignment_student_1(client, h_student_1):
+    # This extra line of code is added because after running this test, the state of the assignment will be changed to SUBMITTED which will cause the test_assignment_resubmit_error to pass but whenever you run this test again gives error so i modify this code to change the state of the assignment to DRAFT
+    assignment = db.session.query(Assignment).filter_by(id=2).first()
+    if assignment.state!=AssignmentStateEnum.DRAFT:
+        assignment.state=AssignmentStateEnum.DRAFT
+        db.session.commit()
+
     response = client.post(
         '/student/assignments/submit',
         headers=h_student_1,
